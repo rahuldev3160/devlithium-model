@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Residents — Devlithium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #F6F1EB;
+      --surface:  #FDFAF6;
+      --text:     #1B1612;
+      --muted:    #8A7E74;
+      --light:    #B8ADA4;
+      --border:   #E2D9D0;
+      --border-lt:#EDE7DF;
+      --blue:     #3B5FA0;
+      --blue-lt:  #EDF0F8;
+      --terra:    #C0592A;
+      --terra-lt: #FAF0EB;
+      --gold:     #A8844E;
+      --gold-lt:  #F9F3E8;
+      --green:    #3A7A5A;
+      --green-lt: #EDF4EF;
+      --r:        14px;
+      --r-sm:     8px;
+      --sidebar:  214px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 14px; }
+    body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; opacity: .45; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: var(--sidebar); min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 200; }
+    .sb-brand { padding: 24px 20px 16px; border-bottom: 1px solid var(--border-lt); }
+    .sb-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
+    .sb-sub { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--light); margin-top: 3px; }
+    .sb-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+    .sb-sec { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--light); font-weight: 500; padding: 12px 12px 5px; }
+    .sb-item { display: flex; align-items: center; gap: 9px; padding: 8px 12px; border-radius: var(--r-sm); cursor: pointer; font-size: 13px; color: var(--muted); text-decoration: none; margin-bottom: 1px; transition: all .13s; }
+    .sb-item svg { width: 14px; height: 14px; opacity: .6; flex-shrink: 0; }
+    .sb-item:hover { background: var(--border-lt); color: var(--text); }
+    .sb-item.active { background: var(--blue-lt); color: var(--blue); font-weight: 500; }
+    .sb-item.active svg { opacity: 1; }
+    .sb-badge { margin-left: auto; background: var(--terra); color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 20px; }
+    .sb-user { padding: 14px; border-top: 1px solid var(--border-lt); }
+    .sb-user-inner { display: flex; align-items: center; gap: 10px; padding: 9px 10px; background: var(--bg); border-radius: var(--r-sm); cursor: pointer; transition: background .13s; }
+    .sb-user-inner:hover { background: var(--border-lt); }
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-weight: 600; color: white; flex-shrink: 0; }
+    .sb-uname { font-size: 13px; font-weight: 500; }
+    .sb-urole { font-size: 11px; color: var(--muted); }
+
+    /* ── Main ── */
+    .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+    .topbar { padding: 16px 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-lt); background: var(--surface); position: sticky; top: 0; z-index: 100; }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 500; letter-spacing: -.02em; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--r-sm); font-size: 12.5px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: all .13s; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: #2D4F90; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--border-lt); color: var(--text); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
+    .btn-terra { background: var(--terra); color: #fff; }
+    .btn-terra:hover { background: #a8491f; }
+    .content { padding: 26px 30px; max-width: 900px; }
+
+    /* ── Section header ── */
+    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .sec-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; letter-spacing: -.02em; }
+    .sec-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; }
+    .chip-admin { background: var(--blue-lt); color: var(--blue); }
+    .chip-owner { background: var(--green-lt); color: var(--green); }
+    .chip-res   { background: var(--gold-lt);  color: var(--gold); }
+
+    /* ── Resident cards ── */
+    .residents-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 32px; }
+    .res-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden;
+      transition: box-shadow .18s;
+    }
+    .res-card:hover { box-shadow: 0 4px 16px rgba(28,22,18,.07); }
+    .res-card-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--border-lt);
+    }
+    .res-info { flex: 1; }
+    .res-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .res-room { font-size: 11.5px; color: var(--muted); }
+    .res-card-body { padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+    /* ── Contact fields ── */
+    .field-row { display: flex; flex-direction: column; gap: 4px; }
+    .field-label {
+      font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted); font-weight: 500;
+    }
+    .field-display {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text); min-height: 30px;
+    }
+    .field-display.empty { color: var(--light); font-style: italic; }
+    .field-input {
+      width: 100%; padding: 7px 10px; border: 1px solid var(--border);
+      border-radius: var(--r-sm); font-size: 13px; font-family: inherit;
+      background: var(--bg); color: var(--text); outline: none;
+      transition: border-color .13s;
+    }
+    .field-input:focus { border-color: var(--blue); }
+    .edit-actions { display: flex; gap: 7px; margin-top: 4px; }
+
+    /* ── Edit mode ── */
+    .res-card.editing { border-color: var(--blue); }
+    .res-card.editing .res-card-header { background: var(--blue-lt); border-color: var(--border-lt); }
+
+    /* ── Admin badge ── */
+    .admin-only-note {
+      font-size: 11.5px; color: var(--muted);
+      background: var(--bg); border: 1px solid var(--border-lt);
+      border-radius: 8px; padding: 8px 12px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 7px;
+    }
+
+    /* ── Bill split section ── */
+    .bill-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden; margin-bottom: 32px;
+    }
+    .bill-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border-lt);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    }
+    .bill-body { padding: 20px 22px; }
+    .bill-meta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+    .bill-amount-display {
+      background: var(--blue); color: white; border-radius: 12px;
+      padding: 16px 20px; text-align: center;
+    }
+    .bill-amount-lbl { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .7; margin-bottom: 6px; }
+    .bill-amount-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px; font-weight: 600; letter-spacing: -.03em; line-height: 1;
+    }
+    .bill-method-badge {
+      font-size: 11px; background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px; padding: 3px 10px; margin-top: 8px; display: inline-block;
+    }
+
+    /* ── Rooms selector ── */
+    .rooms-label {
+      font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted); font-weight: 500; margin-bottom: 10px;
+    }
+    .rooms-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-bottom: 20px; }
+    .room-toggle {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg); border: 2px solid var(--border);
+      border-radius: var(--r-sm); padding: 10px 13px;
+      cursor: pointer; transition: all .15s; user-select: none;
+    }
+    .room-toggle:hover { border-color: var(--blue); }
+    .room-toggle.selected { border-color: var(--blue); background: var(--blue-lt); }
+    .room-toggle input[type="checkbox"] { display: none; }
+    .rt-check {
+      width: 18px; height: 18px; border-radius: 5px;
+      border: 2px solid var(--border); background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all .13s;
+    }
+    .room-toggle.selected .rt-check { background: var(--blue); border-color: var(--blue); color: white; font-size: 11px; }
+    .rt-body { flex: 1; min-width: 0; }
+    .rt-room { font-size: 12.5px; font-weight: 500; }
+    .rt-occupant { font-size: 11.5px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .room-toggle.selected .rt-occupant { color: var(--blue); }
+
+    /* ── Split result ── */
+    .split-result {
+      background: var(--gold-lt); border: 1px solid #DDB96A;
+      border-radius: var(--r); padding: 16px 18px; margin-bottom: 18px;
+    }
+    .split-result-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+    .split-per-space {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px; font-weight: 600; color: var(--gold); letter-spacing: -.03em; line-height: 1;
+    }
+    .split-per-space-lbl { font-size: 12px; color: var(--gold); }
+    .split-rows { display: flex; flex-direction: column; gap: 7px; }
+    .split-row {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px;
+    }
+    .split-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-weight: 600; color: white; flex-shrink: 0; width: 26px; height: 26px; font-size: 13px; }
+    .split-name { flex: 1; }
+    .split-room-tag { font-size: 11px; color: var(--muted); background: var(--bg); border: 1px solid var(--border-lt); border-radius: 20px; padding: 2px 8px; }
+    .split-amount { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--gold); }
+
+    .split-empty {
+      text-align: center; padding: 20px; color: var(--light);
+      font-size: 13px; font-style: italic;
+    }
+
+    /* ── Input row ── */
+    .input-row { display: flex; flex-direction: column; gap: 5px; }
+    .input-label { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+    .text-input {
+      padding: 8px 12px; border: 1px solid var(--border);
+      border-radius: var(--r-sm); font-size: 13.5px; font-family: inherit;
+      background: var(--bg); color: var(--text); outline: none;
+      transition: border-color .13s;
+    }
+    .text-input:focus { border-color: var(--blue); }
+    .amount-input { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; }
+
+    /* ── Expense history ── */
+    .history-table { width: 100%; border-collapse: collapse; }
+    .history-table th { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .history-table td { font-size: 13px; padding: 11px 12px; border-bottom: 1px solid var(--border-lt); vertical-align: middle; }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tr:hover td { background: var(--bg); }
+    .history-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text); color: white;
+      padding: 10px 18px; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s; z-index: 10000;
+    }
+    #toast.show { opacity: 1; }
+    #toast.error { background: var(--terra); }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) { .sidebar { display: none; } .main { margin-left: 0; } .residents-grid { grid-template-columns: 1fr; } .rooms-grid { grid-template-columns: 1fr; } .bill-meta-row { grid-template-columns: 1fr; } }
+    @media (max-width: 580px) { .content { padding: 16px; } .topbar { padding: 13px 16px; } }
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-name">Devlithium</div>
+    <div class="sb-sub">Home Intelligence · Jaipur</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Overview</div>
+    <a class="sb-item" href="/dashboard">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 6.5L8 1.5l6.5 5V14a.5.5 0 01-.5.5H10v-4H6v4H2a.5.5 0 01-.5-.5V6.5z"/></svg>
+      Home
+    </a>
+    <div class="sb-sec">Manage</div>
+    <a class="sb-item active" href="/residents">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 2v2h2V4H4zm4 0v2h2V4H8zm0 4v2h2V8H8zm-4 0v2h2V8H4z"/></svg>
+      Expenses
+    </a>
+    <a class="sb-item" href="/house" style="opacity:.5;pointer-events:none;">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 5v1h1v7h2V9h2v4h2V9h2v4h2V6h1V5L8 1z"/></svg>
+      House
+    </a>
+    <a class="sb-item" href="/my-room" style="opacity:.5;pointer-events:none;">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3.5 3.5 0 100 7A3.5 3.5 0 008 1zM2.5 13c0-2.485 2.46-4.5 5.5-4.5s5.5 2.015 5.5 4.5H2.5z"/></svg>
+      My Room
+    </a>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-user-inner">
+      <div class="avatar" id="sb-avatar" style="width:30px;height:30px;font-size:15px;background:var(--blue)">?</div>
+      <div>
+        <div class="sb-uname" id="sb-uname">—</div>
+        <div class="sb-urole" id="sb-urole">—</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">Residents &amp; Expenses</div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── Residents ── -->
+    <div class="sec-hdr" style="margin-bottom: 6px;">
+      <div>
+        <div class="sec-title">Residents</div>
+        <div class="sec-sub">Contact details — editable by admins</div>
+      </div>
+    </div>
+
+    <div class="admin-only-note" id="admin-note" style="display:none">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="var(--blue)"><path d="M8 1a4 4 0 00-4 4v1H3a1 1 0 00-1 1v7a1 1 0 001 1h10a1 1 0 001-1V7a1 1 0 00-1-1h-1V5a4 4 0 00-4-4z"/></svg>
+      You have admin access — you can edit contact details for all residents.
+    </div>
+
+    <div class="residents-grid" id="residents-grid">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- ── Bill Split ── -->
+    <div class="sec-hdr" style="margin-top: 8px; margin-bottom: 14px;">
+      <div>
+        <div class="sec-title">Log a Bill</div>
+        <div class="sec-sub">Select billable spaces · split calculated automatically</div>
+      </div>
+    </div>
+
+    <div class="bill-card">
+      <div class="bill-header">
+        <div style="flex:1">
+          <div style="font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 6px;">Bill Details</div>
+          <div style="display: flex; flex-direction: column; gap: 10px; max-width: 480px;">
+            <div class="input-row">
+              <div class="input-label">Description</div>
+              <input class="text-input" id="bill-desc" value="Electricity bill — June 2026" placeholder="e.g. Electricity bill — June 2026"/>
+            </div>
+            <div class="input-row">
+              <div class="input-label">Amount (₹)</div>
+              <input class="text-input amount-input" id="bill-amount" type="number" value="7028" min="0" step="1" placeholder="0"/>
+            </div>
+            <div class="input-row">
+              <div class="input-label">Category</div>
+              <select class="text-input" id="bill-category" style="cursor:pointer;">
+                <option value="electricity">Electricity</option>
+                <option value="water">Water</option>
+                <option value="internet">Internet</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="grocery">Grocery</option>
+                <option value="cleaning">Cleaning</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="bill-amount-display" id="bill-summary-panel">
+          <div class="bill-amount-lbl">Total Bill</div>
+          <div class="bill-amount-val" id="bill-display-amount">₹7,028</div>
+          <div class="bill-method-badge" id="bill-method-label">Direct split</div>
+        </div>
+      </div>
+
+      <div class="bill-body">
+        <div class="rooms-label">Select billable spaces (uncheck vacant / unused rooms)</div>
+        <div class="rooms-grid" id="rooms-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div id="split-result-wrap">
+          <!-- Split calculation shown here -->
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-primary" id="log-bill-btn" onclick="logBill()">Log this bill →</button>
+          <span id="bill-log-status" style="font-size: 12.5px; color: var(--muted);"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Expense History ── -->
+    <div class="sec-hdr" style="margin-bottom: 12px;">
+      <div>
+        <div class="sec-title">Expense History</div>
+        <div class="sec-sub">All logged bills and pool deductions</div>
+      </div>
+    </div>
+    <div class="history-wrap" id="history-wrap">
+      <div style="padding: 20px; text-align: center; color: var(--light); font-size: 13px; font-style: italic;">Loading…</div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // ── Data ─────────────────────────────────────────────────────────────────────
+
+  let ME = null;
+  let IS_ADMIN = false;
+
+  // Billable rooms definition (matches house_kb.json)
+  const BILLABLE_ROOMS = [
+    { id: 'r1', name: 'Master Bedroom', occupant_id: 'u3', occupant_name: 'Hanu', color: '#3A7A5A' },
+    { id: 'r2', name: 'Room 2',         occupant_id: 'u2', occupant_name: 'Sarita', color: '#C0592A' },
+    { id: 'r3', name: 'Room 3',         occupant_id: 'u1', occupant_name: 'Rahul', color: '#3B5FA0' },
+    { id: 'r7', name: 'Office / AC',    occupant_id: 'u3', occupant_name: 'Hanu (Office)', color: '#3A7A5A' },
+  ];
+
+  const ADMINS = ['u1', 'u3', 'u4'];
+
+  const AVATAR_COLORS = { u1: '#3B5FA0', u2: '#C0592A', u3: '#3A7A5A', u4: '#A8844E' };
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+
+  async function init() {
+    try {
+      const res = await fetch('/api/me');
+      if (res.ok) ME = await res.json();
+    } catch {}
+
+    if (!ME) {
+      const stored = localStorage.getItem('dl_user');
+      if (!stored) { window.location.href = 'login.html'; return; }
+      ME = JSON.parse(stored);
+      ME.demo = true;
+    }
+
+    IS_ADMIN = ADMINS.includes(ME.user_id);
+
+    // Sidebar
+    const av = document.getElementById('sb-avatar');
+    av.style.background = ME.color || AVATAR_COLORS[ME.user_id] || '#888';
+    av.textContent = (ME.name || '?')[0];
+    document.getElementById('sb-uname').textContent = ME.name || '—';
+    document.getElementById('sb-urole').textContent = IS_ADMIN ? 'Admin' : 'Resident';
+
+    if (IS_ADMIN) document.getElementById('admin-note').style.display = 'flex';
+
+    await loadResidents();
+    renderRoomsGrid();
+    updateSplitCalc();
+    await loadHistory();
+
+    document.getElementById('bill-amount').addEventListener('input', updateSplitCalc);
+  }
+
+  // ── Residents ────────────────────────────────────────────────────────────────
+
+  let residentsData = [];
+
+  async function loadResidents() {
+    try {
+      const res = await fetch('/api/residents');
+      if (res.ok) { residentsData = await res.json(); }
+    } catch {}
+
+    if (!residentsData.length) {
+      // Demo fallback
+      residentsData = [
+        { id: 'u1', name: 'Rahul', color: '#3B5FA0', role: 'Admin',    room: 'Room 3',             email: 'dev.ucs0108@gmail.com', phone: '' },
+        { id: 'u2', name: 'Sarita',color: '#C0592A', role: 'Resident', room: 'Room 2',             email: '', phone: '' },
+        { id: 'u3', name: 'Hanu',  color: '#3A7A5A', role: 'Owner',    room: 'Master Bedroom',     email: '', phone: '' },
+        { id: 'u4', name: 'Loki',  color: '#A8844E', role: 'Admin',    room: 'Office (currently)', email: '', phone: '' },
+      ];
+    }
+
+    renderResidents();
+  }
+
+  function renderResidents() {
+    const grid = document.getElementById('residents-grid');
+    grid.innerHTML = residentsData.map(r => {
+      const chipClass = r.role === 'Owner' ? 'chip-owner' : r.role === 'Admin' ? 'chip-admin' : 'chip-res';
+      const isMe = r.id === ME?.user_id;
+      return `
+      <div class="res-card" id="card-${r.id}">
+        <div class="res-card-header">
+          <div class="avatar" style="width:40px;height:40px;font-size:19px;background:${r.color}">${r.name[0]}</div>
+          <div class="res-info">
+            <div class="res-name">${r.name}${isMe ? ' <span style="font-size:11px;color:var(--muted);font-weight:400;">(you)</span>' : ''}</div>
+            <div class="res-room">${r.room && r.room !== 'undefined' ? r.room : (r.role || '—')}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="chip ${chipClass}">${r.role}</span>
+            ${IS_ADMIN ? `<button class="btn btn-ghost btn-sm" onclick="startEdit('${r.id}')">Edit</button>` : ''}
+          </div>
+        </div>
+        <div class="res-card-body" id="body-${r.id}">
+          ${renderContactView(r)}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderContactView(r) {
+    const emailVal = r.email && r.email !== 'FILL_IN' ? r.email : null;
+    const phoneVal = r.phone && r.phone !== 'FILL_IN' ? r.phone : null;
+    return `
+      <div class="field-row">
+        <div class="field-label">Email</div>
+        <div class="field-display ${!emailVal ? 'empty' : ''}">
+          ${emailVal ? `<svg width="12" height="12" viewBox="0 0 16 16" fill="var(--muted)"><path d="M2 4a1 1 0 011-1h10a1 1 0 011 1v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm1 0v.511l5 3.124 5-3.124V4H3zm0 1.644V12h10V5.644L8 8.876 3 5.644z"/></svg> ${emailVal}` : 'Not set'}
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Phone</div>
+        <div class="field-display ${!phoneVal ? 'empty' : ''}">
+          ${phoneVal ? `<svg width="12" height="12" viewBox="0 0 16 16" fill="var(--muted)"><path d="M3.654 1.328a.678.678 0 00-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 004.168 6.608 17.569 17.569 0 006.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 00-.063-1.015l-2.307-1.794a.678.678 0 00-.58-.122l-2.19.547a1.745 1.745 0 01-1.657-.459L5.482 8.062a1.745 1.745 0 01-.46-1.657l.548-2.19a.678.678 0 00-.122-.58L3.654 1.328z"/></svg> ${phoneVal}` : 'Not set'}
+        </div>
+      </div>`;
+  }
+
+  function startEdit(uid) {
+    const r = residentsData.find(x => x.id === uid);
+    if (!r) return;
+    const card = document.getElementById('card-' + uid);
+    const body = document.getElementById('body-' + uid);
+    card.classList.add('editing');
+
+    const emailVal = (r.email && r.email !== 'FILL_IN') ? r.email : '';
+    const phoneVal = (r.phone && r.phone !== 'FILL_IN') ? r.phone : '';
+
+    body.innerHTML = `
+      <div class="field-row">
+        <div class="field-label">Email</div>
+        <input class="field-input" id="edit-email-${uid}" type="email" value="${emailVal}" placeholder="email@example.com"/>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Phone</div>
+        <input class="field-input" id="edit-phone-${uid}" type="tel" value="${phoneVal}" placeholder="+91 XXXXX XXXXX"/>
+      </div>
+      <div class="edit-actions">
+        <button class="btn btn-primary btn-sm" onclick="saveContact('${uid}')">Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelEdit('${uid}')">Cancel</button>
+      </div>`;
+
+    document.getElementById('edit-email-' + uid).focus();
+  }
+
+  function cancelEdit(uid) {
+    const r = residentsData.find(x => x.id === uid);
+    const card = document.getElementById('card-' + uid);
+    const body = document.getElementById('body-' + uid);
+    card.classList.remove('editing');
+    body.innerHTML = renderContactView(r);
+  }
+
+  async function saveContact(uid) {
+    const email = document.getElementById('edit-email-' + uid).value.trim();
+    const phone = document.getElementById('edit-phone-' + uid).value.trim();
+
+    // Optimistic update
+    const r = residentsData.find(x => x.id === uid);
+    r.email = email;
+    r.phone = phone;
+
+    if (!ME?.demo) {
+      try {
+        const res = await fetch(`/api/residents/${uid}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, phone }),
+        });
+        if (!res.ok) { showToast('Save failed — backend error', true); return; }
+      } catch {
+        showToast('Save failed — backend not running', true);
+        return;
+      }
+    }
+
+    cancelEdit(uid);
+    showToast(`Contact details saved for ${r.name}`);
+  }
+
+  // ── Bill Split ───────────────────────────────────────────────────────────────
+
+  let selectedRooms = new Set(['r1', 'r2', 'r3', 'r7']); // all selected by default
+
+  function renderRoomsGrid() {
+    const grid = document.getElementById('rooms-grid');
+    grid.innerHTML = BILLABLE_ROOMS.map(r => `
+      <label class="room-toggle ${selectedRooms.has(r.id) ? 'selected' : ''}" id="toggle-${r.id}" onclick="toggleRoom('${r.id}')">
+        <div class="rt-check">${selectedRooms.has(r.id) ? '✓' : ''}</div>
+        <div class="rt-body">
+          <div class="rt-room">${r.name}</div>
+          <div class="rt-occupant">${r.occupant_name}</div>
+        </div>
+      </label>`).join('');
+  }
+
+  function toggleRoom(id) {
+    if (selectedRooms.has(id)) {
+      selectedRooms.delete(id);
+    } else {
+      selectedRooms.add(id);
+    }
+    // Update toggle UI
+    const toggle = document.getElementById('toggle-' + id);
+    const check = toggle.querySelector('.rt-check');
+    if (selectedRooms.has(id)) {
+      toggle.classList.add('selected');
+      check.textContent = '✓';
+    } else {
+      toggle.classList.remove('selected');
+      check.textContent = '';
+    }
+    updateSplitCalc();
+  }
+
+  function fmtInr(n) {
+    if (!n && n !== 0) return '—';
+    return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  }
+
+  function updateSplitCalc() {
+    const amount = parseFloat(document.getElementById('bill-amount').value) || 0;
+    const method = amount >= 1000 ? 'Direct split' : 'Pool deduction';
+
+    document.getElementById('bill-display-amount').textContent = fmtInr(amount);
+    document.getElementById('bill-method-label').textContent = method;
+
+    const wrap = document.getElementById('split-result-wrap');
+    const selected = BILLABLE_ROOMS.filter(r => selectedRooms.has(r.id));
+
+    if (!selected.length) {
+      wrap.innerHTML = `<div class="split-result" style="background:var(--terra-lt);border-color:var(--terra)"><div class="split-empty" style="color:var(--terra)">Select at least one space to split</div></div>`;
+      return;
+    }
+
+    const share = amount / selected.length;
+    const shareFormatted = fmtInr(share);
+
+    const rows = selected.map(r => `
+      <div class="split-row">
+        <div class="split-avatar" style="background:${r.color}">${r.occupant_name[0]}</div>
+        <div class="split-name">${r.occupant_name}</div>
+        <div class="split-room-tag">${r.name}</div>
+        <div class="split-amount">${shareFormatted}</div>
+      </div>`).join('');
+
+    wrap.innerHTML = `
+      <div class="split-result">
+        <div class="split-result-header">
+          <div class="split-per-space">${shareFormatted}</div>
+          <div class="split-per-space-lbl">per space · ${selected.length} spaces · ${method.toLowerCase()}</div>
+        </div>
+        <div class="split-rows">${rows}</div>
+      </div>`;
+  }
+
+  async function logBill() {
+    const amount = parseFloat(document.getElementById('bill-amount').value) || 0;
+    const desc   = document.getElementById('bill-desc').value.trim() || 'Expense';
+    const cat    = document.getElementById('bill-category').value;
+    const rooms  = Array.from(selectedRooms);
+
+    if (!rooms.length) { showToast('Select at least one room first', true); return; }
+    if (!amount)       { showToast('Enter a valid amount', true); return; }
+
+    const btn    = document.getElementById('log-bill-btn');
+    const status = document.getElementById('bill-log-status');
+    btn.disabled = true;
+    btn.textContent = 'Logging…';
+
+    if (!ME?.demo) {
+      try {
+        const res = await fetch('/api/finance/bills', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount_inr: amount, description: desc, category: cat, included_rooms: rooms }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.detail || 'Log failed', true); btn.disabled = false; btn.textContent = 'Log this bill →'; return; }
+        showToast(`${fmtInr(amount)} bill logged · ${fmtInr(data.entry.share_per_space_inr)}/space`);
+        await loadHistory();
+      } catch {
+        showToast('Backend not running — bill not saved', true);
+      }
+    } else {
+      // Demo mode: just show success
+      const share = amount / selectedRooms.size;
+      showToast(`Demo mode: ${fmtInr(amount)} would be split as ${fmtInr(share)}/space`);
+      // Add to demo history
+      const demoEntry = {
+        date: new Date().toISOString().split('T')[0],
+        description: desc,
+        category: cat,
+        amount_inr: amount,
+        num_spaces: selectedRooms.size,
+        share_per_space_inr: share,
+        method: amount >= 1000 ? 'direct_split' : 'pool_deduction',
+      };
+      renderHistoryEntry(demoEntry, true);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Log this bill →';
+  }
+
+  // ── History ──────────────────────────────────────────────────────────────────
+
+  function renderHistoryEntry(entry, prepend = false) {
+    const wrap = document.getElementById('history-wrap');
+    let table = wrap.querySelector('.history-table');
+    if (!table) {
+      wrap.innerHTML = `<table class="history-table"><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Spaces</th><th>Per Space</th><th>Method</th></tr></thead><tbody id="history-body"></tbody></table>`;
+      table = wrap.querySelector('.history-table');
+    }
+    const body = document.getElementById('history-body');
+    const methodBadge = entry.method === 'direct_split'
+      ? `<span class="chip chip-admin" style="font-size:10.5px">Split</span>`
+      : `<span class="chip chip-res" style="font-size:10.5px">Pool</span>`;
+    const row = `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">${entry.date}</td>
+      <td>${entry.description || '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:500">${fmtInr(entry.amount_inr)}</td>
+      <td style="text-align:center">${entry.num_spaces || '—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--gold)">${fmtInr(entry.share_per_space_inr)}</td>
+      <td>${methodBadge}</td>
+    </tr>`;
+    if (prepend) {
+      body.insertAdjacentHTML('afterbegin', row);
+    } else {
+      body.insertAdjacentHTML('beforeend', row);
+    }
+  }
+
+  async function loadHistory() {
+    if (ME?.demo) {
+      document.getElementById('history-wrap').innerHTML = `<div style="padding:20px;text-align:center;color:var(--light);font-size:13px;font-style:italic">No history yet — log a bill above to see it here. (Demo mode: changes won't persist without the backend.)</div>`;
+      return;
+    }
+    try {
+      const res = await fetch('/api/finance/bills');
+      if (!res.ok) return;
+      const bills = await res.json();
+      if (!bills.length) {
+        document.getElementById('history-wrap').innerHTML = `<div style="padding:20px;text-align:center;color:var(--light);font-size:13px;font-style:italic">No bills logged yet.</div>`;
+        return;
+      }
+      document.getElementById('history-wrap').innerHTML = `<table class="history-table"><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Spaces</th><th>Per Space</th><th>Method</th></tr></thead><tbody id="history-body"></tbody></table>`;
+      // Most recent first
+      [...bills].reverse().forEach(b => renderHistoryEntry(b));
+    } catch {}
+  }
+
+  // ── Util ─────────────────────────────────────────────────────────────────────
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = isError ? 'show error' : 'show';
+    setTimeout(() => { t.className = ''; }, 3000);
+  }
+
+  async function logout() {
+    localStorage.removeItem('dl_user');
+    if (!ME?.demo) await fetch('/api/logout', { method: 'POST' });
+    window.location.href = 'login.html';
+  }
+
+  init();
+</script>
+</body>
+</html>

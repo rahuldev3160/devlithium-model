@@ -1,0 +1,23 @@
+# Sensitive data — never commit
+web/auth_config.json
+data/house_kb.json
+data/notify_config.json
+data/profiles/
+
+# Personal logs
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local memory
+.claude/

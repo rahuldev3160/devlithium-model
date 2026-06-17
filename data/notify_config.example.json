@@ -1,0 +1,12 @@
+{
+  "gmail_address": "your@gmail.com",
+  "gmail_app_password": "FILL_IN",
+  "_instructions": "Get your App Password at https://myaccount.google.com/apppasswords",
+  "whatsapp_enabled": false,
+  "twilio_sid": null,
+  "twilio_token": null,
+  "twilio_whatsapp_from": null,
+  "max_notifications_per_day": 3,
+  "digest_time": "08:00",
+  "timezone": "Asia/Kolkata"
+}

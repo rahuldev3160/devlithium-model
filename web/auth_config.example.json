@@ -1,0 +1,12 @@
+{
+  "u1": {
+    "pin": "XXXX",
+    "name": "Resident Name",
+    "color": "#3B5FA0"
+  },
+  "u2": {
+    "pin": "XXXX",
+    "name": "Resident Name",
+    "color": "#C0592A"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "project": "web",
+  "date": "2026-06-17",
+  "completed_tasks": {
+    "newly_marked_done": [],
+    "git_task_refs_today": [],
+    "total_done": 0,
+    "total_tasks": 0,
+    "refresh_output": null
+  },
+  "decisions": [],
+  "new_artefacts": {},
+  "git_summary": {
+    "branch": "",
+    "last_sha": "",
+    "commits_today": [],
+    "uncommitted_files": []
+  },
+  "changed_files": [],
+  "replicable_patterns": [],
+  "handoff_excerpt": ""
+}
