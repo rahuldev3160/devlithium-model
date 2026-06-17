@@ -11,12 +11,14 @@
     :root {
       --bg:#F6F1EB;--surface:#FDFAF6;--text:#1B1612;--muted:#8A7E74;--light:#B8ADA4;
       --border:#E2D9D0;--border-lt:#EDE7DF;--blue:#3B5FA0;--blue-lt:#EDF0F8;
-      --terra:#C0592A;--gold:#A8844E;--gold-lt:#F9F3E8;--green:#3A7A5A;--green-lt:#EDF4EF;
-      --r:14px;--r-sm:8px;--sidebar:214px;
+      --terra:#C0592A;--terra-lt:#FAEEE8;--gold:#A8844E;--gold-lt:#F9F3E8;
+      --green:#3A7A5A;--green-lt:#EDF4EF;--r:14px;--r-sm:8px;--sidebar:214px;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;}
     body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.45;}
+
+    /* ── Sidebar ── */
     .sidebar{width:var(--sidebar);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:200;}
     .sb-brand{padding:24px 20px 16px;border-bottom:1px solid var(--border-lt);}
     .sb-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:-.02em;}
@@ -33,19 +35,119 @@
     .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;color:white;flex-shrink:0;}
     .sb-uname{font-size:13px;font-weight:500;}
     .sb-urole{font-size:11px;color:var(--muted);}
-    .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+
+    /* ── Main ── */
+    .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
     .topbar{padding:16px 30px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-lt);background:var(--surface);position:sticky;top:0;z-index:100;}
     .topbar-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;letter-spacing:-.02em;}
-    .coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;padding:60px 30px;text-align:center;}
-    .cs-icon{font-size:48px;opacity:.4;}
-    .cs-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;letter-spacing:-.02em;color:var(--text);}
-    .cs-note{font-size:13px;color:var(--muted);max-width:340px;line-height:1.65;}
-    .cs-items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;}
-    .cs-tag{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--muted);}
+    .tab-bar{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:3px;}
+    .tab{padding:5px 14px;border:none;background:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;transition:all .13s;}
+    .tab.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+
+    .content{padding:28px 30px;flex:1;}
+    .hidden{display:none!important;}
+
+    /* ── Repairs ── */
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .section-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;}
+    .filter-pills{display:flex;gap:6px;}
+    .pill{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:none;font-size:12px;color:var(--muted);cursor:pointer;transition:all .13s;}
+    .pill.active{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);font-weight:500;}
+
+    .repair-list{display:flex;flex-direction:column;gap:10px;}
+    .repair-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow .13s;}
+    .repair-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06);}
+    .urgency-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+    .urgency-dot.high{background:var(--terra);}
+    .urgency-dot.medium{background:var(--gold);}
+    .urgency-dot.low{background:var(--green);}
+    .repair-body{flex:1;}
+    .repair-title{font-weight:500;font-size:14px;margin-bottom:3px;}
+    .repair-meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;}
+    .repair-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+    .badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;}
+    .badge-open{background:var(--terra-lt);color:var(--terra);}
+    .badge-in_progress{background:var(--gold-lt);color:var(--gold);}
+    .badge-resolved{background:var(--green-lt);color:var(--green);}
+    .btn{padding:6px 14px;border-radius:var(--r-sm);border:none;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .13s;}
+    .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
+    .btn-ghost:hover{background:var(--bg);color:var(--text);}
+    .btn-primary{background:var(--blue);color:white;}
+    .btn-primary:hover{opacity:.88;}
+    .btn-sm{padding:4px 10px;font-size:12px;}
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+    .empty-icon{font-size:36px;opacity:.35;margin-bottom:12px;}
+    .empty-text{font-size:13px;}
+
+    /* ── Log Issue Button ── */
+    .fab{position:fixed;bottom:32px;right:32px;background:var(--blue);color:white;border:none;border-radius:40px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(59,95,160,.32);z-index:500;transition:all .15s;}
+    .fab:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(59,95,160,.38);}
+    .fab svg{width:16px;height:16px;}
+
+    /* ── Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(27,22,18,.45);z-index:800;display:flex;align-items:center;justify-content:center;}
+    .modal{background:var(--surface);border-radius:var(--r);padding:28px;width:460px;max-width:calc(100vw - 40px);box-shadow:0 16px 48px rgba(0,0,0,.18);}
+    .modal-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:20px;}
+    .form-group{margin-bottom:16px;}
+    .form-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block;}
+    .form-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .13s;}
+    .form-input:focus{border-color:var(--blue);}
+    select.form-input{cursor:pointer;}
+    textarea.form-input{resize:vertical;min-height:72px;}
+    .urgency-group{display:flex;gap:8px;}
+    .urgency-btn{flex:1;padding:7px;border:1px solid var(--border);border-radius:var(--r-sm);background:none;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .13s;text-align:center;}
+    .urgency-btn.sel-high{background:var(--terra-lt);border-color:var(--terra);color:var(--terra);font-weight:500;}
+    .urgency-btn.sel-medium{background:var(--gold-lt);border-color:var(--gold);color:var(--gold);font-weight:500;}
+    .urgency-btn.sel-low{background:var(--green-lt);border-color:var(--green);color:var(--green);font-weight:500;}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
+
+    /* ── Inventory ── */
+    .inv-section{margin-bottom:30px;}
+    .inv-section-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--light);font-weight:500;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-lt);}
+    .inv-grid{display:flex;flex-direction:column;gap:6px;}
+    .inv-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);}
+    .inv-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .inv-dot.ok{background:var(--green);}
+    .inv-dot.low{background:var(--gold);}
+    .inv-dot.out{background:var(--terra);}
+    .inv-name{flex:1;font-size:13px;}
+    .inv-qty-wrap{display:flex;align-items:center;gap:6px;}
+    .inv-qty{font-size:13px;color:var(--muted);}
+    .inv-qty-input{width:60px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);text-align:center;outline:none;}
+    .inv-qty-input:focus{border-color:var(--blue);}
+    .inv-unit{font-size:11px;color:var(--light);}
+    .inv-save{padding:3px 10px;border-radius:6px;border:1px solid var(--green);background:var(--green-lt);color:var(--green);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;}
+    .inv-save.visible{display:inline-block;}
+    .inv-thresh{font-size:11px;color:var(--light);margin-left:4px;}
+
+    /* ── Nudges / Flags ── */
+    .nudge-compose{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:24px;}
+    .nudge-label{font-size:12px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .anon-badge{background:var(--gold-lt);color:var(--gold);border-radius:10px;padding:2px 8px;font-size:11px;font-weight:500;}
+    .nudge-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);resize:none;min-height:80px;outline:none;transition:border-color .13s;}
+    .nudge-textarea:focus{border-color:var(--blue);}
+    .nudge-compose-footer{display:flex;justify-content:flex-end;margin-top:10px;}
+    .flags-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .flags-title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--light);font-weight:500;}
+    .flag-count{background:var(--terra-lt);color:var(--terra);border-radius:10px;padding:2px 8px;font-size:11px;font-weight:500;}
+    .flags-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+    .flag-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;}
+    .flag-text{font-size:13px;line-height:1.55;}
+    .flag-date{font-size:11px;color:var(--light);margin-top:4px;}
+    .nudges-list{display:flex;flex-direction:column;gap:10px;}
+    .nudge-card{background:var(--gold-lt);border:1px solid #E8D9C0;border-radius:var(--r);padding:16px 18px;}
+    .nudge-icon{font-size:18px;margin-bottom:8px;}
+    .nudge-text{font-size:13px;line-height:1.6;color:var(--text);}
+    .nudge-meta{font-size:11px;color:var(--gold);margin-top:8px;}
+    .synthesize-btn{padding:7px 16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:opacity .13s;}
+    .synthesize-btn:hover{opacity:.8;}
+    .synthesize-btn:disabled{opacity:.4;cursor:default;}
+
     @media(max-width:960px){.sidebar{display:none;}.main{margin-left:0;}}
   </style>
 </head>
 <body>
+
 <aside class="sidebar">
   <div class="sb-brand">
     <div class="sb-name">Devlithium</div>
@@ -80,34 +182,418 @@
     </div>
   </div>
 </aside>
+
 <main class="main">
   <div class="topbar">
     <div class="topbar-title">House</div>
-  </div>
-  <div class="coming-soon">
-    <div class="cs-icon">🔧</div>
-    <div class="cs-title">House — Coming soon</div>
-    <div class="cs-note">Repairs, inventory alerts, and anonymous behavioral flags will live here. Log issues, track maintenance, and keep the house in good shape.</div>
-    <div class="cs-items">
-      <span class="cs-tag">Open repairs</span>
-      <span class="cs-tag">Inventory alerts</span>
-      <span class="cs-tag">Behavioral flags</span>
-      <span class="cs-tag">Photo issue log</span>
+    <div class="tab-bar">
+      <button class="tab active" onclick="showTab('repairs')">Repairs</button>
+      <button class="tab" onclick="showTab('inventory')">Inventory</button>
+      <button class="tab" onclick="showTab('nudges')">Nudges</button>
     </div>
   </div>
+
+  <!-- ── Repairs ─────────────────────────────────────────────────────────── -->
+  <div id="tab-repairs" class="content">
+    <div class="section-header">
+      <div class="section-title">Repairs &amp; Issues</div>
+      <div class="filter-pills">
+        <button class="pill active" onclick="filterRepairs('open')">Open</button>
+        <button class="pill" onclick="filterRepairs('in_progress')">In Progress</button>
+        <button class="pill" onclick="filterRepairs('resolved')">Resolved</button>
+        <button class="pill" onclick="filterRepairs('all')">All</button>
+      </div>
+    </div>
+    <div class="repair-list" id="repair-list">
+      <div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-text">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ── Inventory ───────────────────────────────────────────────────────── -->
+  <div id="tab-inventory" class="content hidden">
+    <div class="section-header">
+      <div class="section-title">Inventory</div>
+      <div style="font-size:12px;color:var(--muted)" id="inv-admin-note"></div>
+    </div>
+    <div id="inventory-content">
+      <div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ── Nudges ──────────────────────────────────────────────────────────── -->
+  <div id="tab-nudges" class="content hidden">
+    <div class="nudge-compose">
+      <div class="nudge-label">
+        Raise a concern &nbsp;<span class="anon-badge">Anonymous</span>
+      </div>
+      <textarea class="nudge-textarea" id="flag-text" placeholder="What's bothering you? (e.g. dishes left in sink, lights left on, noise after midnight…)"></textarea>
+      <div class="nudge-compose-footer">
+        <button class="btn btn-primary" onclick="submitFlag()">Submit anonymously</button>
+      </div>
+    </div>
+
+    <div class="flags-header">
+      <div class="flags-title">Pending concerns</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="flag-count" id="flag-count">0</span>
+        <button class="synthesize-btn hidden" id="synthesize-btn" onclick="synthesize()">✦ Generate nudge</button>
+      </div>
+    </div>
+    <div class="flags-list" id="flags-list"></div>
+
+    <div class="flags-header" style="margin-top:4px;">
+      <div class="flags-title">House nudges</div>
+    </div>
+    <div class="nudges-list" id="nudges-list"></div>
+  </div>
 </main>
+
+<!-- ── Log Issue Modal ──────────────────────────────────────────────────────── -->
+<div class="modal-overlay hidden" id="modal-repair" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">Log a repair issue</div>
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-input" id="rep-title" placeholder="e.g. Kitchen tap dripping" maxlength="80"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Room</label>
+      <select class="form-input" id="rep-room">
+        <option value="">— Select room —</option>
+        <option value="r1">Master Bedroom</option>
+        <option value="r2">Room 2</option>
+        <option value="r3">Room 3</option>
+        <option value="r4">Kitchen</option>
+        <option value="r5">Living Room</option>
+        <option value="r6">Terrace</option>
+        <option value="r7">Office</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Urgency</label>
+      <div class="urgency-group">
+        <button class="urgency-btn sel-low" onclick="selectUrgency('low', this)">Low</button>
+        <button class="urgency-btn" onclick="selectUrgency('medium', this)" style="border-color:var(--border)">Medium</button>
+        <button class="urgency-btn" onclick="selectUrgency('high', this)" style="border-color:var(--border)">High</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description <span style="color:var(--light)">(optional)</span></label>
+      <textarea class="form-input" id="rep-desc" placeholder="Any details that help with fixing it…" rows="3"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitRepair()">Log issue</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB — only visible on Repairs tab -->
+<button class="fab" id="fab-log" onclick="openModal()">
+  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 018 2z"/></svg>
+  Log issue
+</button>
+
 <script>
+  let me = null;
+  let allRepairs = [];
+  let activeFilter = 'open';
+  let selectedUrgency = 'low';
+  let isAdmin = false;
+
   async function init() {
-    let me = null;
     try { const r = await fetch('/api/me'); if (r.ok) me = await r.json(); } catch {}
     if (!me) { const s = localStorage.getItem('dl_user'); if (s) me = JSON.parse(s); }
-    if (!me) { window.location.href = 'login.html'; return; }
+    if (!me) { window.location.href = '/login'; return; }
+
     const av = document.getElementById('sb-avatar');
     av.style.background = me.color || '#3B5FA0';
     av.textContent = (me.name || '?')[0];
     document.getElementById('sb-uname').textContent = me.name || '—';
     document.getElementById('sb-urole').textContent = me.role || 'Resident';
+
+    isAdmin = ['u1','u3','u4'].includes(me.user_id);
+
+    loadRepairs();
   }
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+
+  function showTab(name) {
+    ['repairs','inventory','nudges'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('hidden', t !== name);
+    });
+    document.querySelectorAll('.tab').forEach((b, i) => {
+      b.classList.toggle('active', ['repairs','inventory','nudges'][i] === name);
+    });
+    document.getElementById('fab-log').classList.toggle('hidden', name !== 'repairs');
+
+    if (name === 'inventory') loadInventory();
+    if (name === 'nudges') loadFlags();
+  }
+
+  // ── Repairs ───────────────────────────────────────────────────────────────
+
+  async function loadRepairs() {
+    try {
+      const r = await fetch('/api/house/repairs');
+      if (!r.ok) throw new Error();
+      allRepairs = await r.json();
+    } catch { allRepairs = []; }
+    renderRepairs();
+  }
+
+  function filterRepairs(status) {
+    activeFilter = status;
+    document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    renderRepairs();
+  }
+
+  function renderRepairs() {
+    const list = document.getElementById('repair-list');
+    const filtered = activeFilter === 'all'
+      ? allRepairs
+      : allRepairs.filter(r => r.status === activeFilter);
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">✓</div><div class="empty-text">No ${activeFilter === 'all' ? '' : activeFilter + ' '}issues</div></div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(r => `
+      <div class="repair-card">
+        <div class="urgency-dot ${r.urgency || 'medium'}"></div>
+        <div class="repair-body">
+          <div class="repair-title">${esc(r.title)}</div>
+          <div class="repair-meta">
+            <span>${r.room_name || '—'}</span>
+            <span>${r.reported_date || ''}</span>
+            ${r.reporter_name ? `<span>by ${esc(r.reporter_name)}</span>` : ''}
+            ${r.cost_inr ? `<span>₹${r.cost_inr}</span>` : ''}
+          </div>
+          ${r.description ? `<div style="font-size:12px;color:var(--muted);margin-top:5px;">${esc(r.description)}</div>` : ''}
+        </div>
+        <div class="repair-actions">
+          <span class="badge badge-${r.status}">${statusLabel(r.status)}</span>
+          ${isAdmin && r.status === 'open' ? `<button class="btn btn-ghost btn-sm" onclick="updateRepair('${r.id}','in_progress')">Start</button>` : ''}
+          ${isAdmin && r.status === 'in_progress' ? `<button class="btn btn-ghost btn-sm" onclick="updateRepair('${r.id}','resolved')">Resolve</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function updateRepair(id, status) {
+    const r = await fetch(`/api/house/repairs/${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({status}),
+    });
+    if (r.ok) loadRepairs();
+    else alert('Could not update repair.');
+  }
+
+  function statusLabel(s) {
+    return {open:'Open',in_progress:'In progress',resolved:'Resolved'}[s] || s;
+  }
+
+  // ── Modal ─────────────────────────────────────────────────────────────────
+
+  function openModal() {
+    selectedUrgency = 'low';
+    document.getElementById('rep-title').value = '';
+    document.getElementById('rep-desc').value = '';
+    document.getElementById('rep-room').value = '';
+    document.getElementById('modal-repair').classList.remove('hidden');
+    document.getElementById('rep-title').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modal-repair').classList.add('hidden');
+  }
+
+  function selectUrgency(level, btn) {
+    selectedUrgency = level;
+    document.querySelectorAll('.urgency-btn').forEach(b => {
+      b.className = 'urgency-btn';
+      b.style.borderColor = 'var(--border)';
+    });
+    btn.classList.add('sel-' + level);
+  }
+
+  async function submitRepair() {
+    const title = document.getElementById('rep-title').value.trim();
+    if (!title) { document.getElementById('rep-title').focus(); return; }
+    const body = {
+      title,
+      description: document.getElementById('rep-desc').value.trim(),
+      room_id: document.getElementById('rep-room').value || null,
+      urgency: selectedUrgency,
+    };
+    const r = await fetch('/api/house/repairs', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+    if (r.ok) { closeModal(); loadRepairs(); }
+    else alert('Could not log issue.');
+  }
+
+  // ── Inventory ─────────────────────────────────────────────────────────────
+
+  async function loadInventory() {
+    const container = document.getElementById('inventory-content');
+    try {
+      const r = await fetch('/api/house/inventory');
+      if (!r.ok) throw new Error();
+      const items = await r.json();
+
+      if (isAdmin) {
+        document.getElementById('inv-admin-note').textContent = 'Tap qty to edit';
+      }
+
+      const sections = {};
+      items.forEach(it => {
+        const label = it.section === 'grocery' ? 'Grocery' : 'Cleaning Supplies';
+        (sections[label] = sections[label] || []).push(it);
+      });
+
+      container.innerHTML = Object.entries(sections).map(([sec, its]) => `
+        <div class="inv-section">
+          <div class="inv-section-title">${sec}</div>
+          <div class="inv-grid">
+            ${its.map(it => `
+              <div class="inv-row">
+                <div class="inv-dot ${it.status}"></div>
+                <div class="inv-name">${esc(it.item)}</div>
+                <div class="inv-qty-wrap">
+                  ${isAdmin
+                    ? `<input class="inv-qty-input" type="number" min="0" step="0.5"
+                         value="${it.current_qty}"
+                         data-item="${esc(it.item)}"
+                         data-original="${it.current_qty}"
+                         oninput="onQtyChange(this)"
+                         onblur="saveQty(this)"/>`
+                    : `<span class="inv-qty">${it.current_qty}</span>`
+                  }
+                  <span class="inv-unit">${esc(it.unit)}</span>
+                  <span class="inv-thresh">/ ${it.reorder_threshold} min</span>
+                  <button class="inv-save" id="save-${esc(it.item).replace(/\s/g,'_')}" onclick="saveQty(this.previousElementSibling||this)">Save</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    } catch {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Could not load inventory.</div></div>';
+    }
+  }
+
+  function onQtyChange(input) {
+    const original = parseFloat(input.dataset.original);
+    const current = parseFloat(input.value);
+    const saveBtn = input.parentElement.querySelector('.inv-save');
+    if (saveBtn) saveBtn.classList.toggle('visible', current !== original);
+  }
+
+  async function saveQty(input) {
+    if (input.tagName === 'BUTTON') {
+      input = input.parentElement.querySelector('.inv-qty-input');
+    }
+    const item = input.dataset.item;
+    const qty = parseFloat(input.value);
+    if (isNaN(qty) || qty < 0) return;
+    const r = await fetch('/api/house/inventory', {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({item, current_qty: qty}),
+    });
+    if (r.ok) {
+      input.dataset.original = qty;
+      const saveBtn = input.parentElement.querySelector('.inv-save');
+      if (saveBtn) saveBtn.classList.remove('visible');
+    }
+  }
+
+  // ── Flags / Nudges ────────────────────────────────────────────────────────
+
+  async function loadFlags() {
+    const r = await fetch('/api/house/flags');
+    if (!r.ok) return;
+    const data = await r.json();
+
+    const flags = data.flags || [];
+    const nudges = data.nudges || [];
+
+    document.getElementById('flag-count').textContent = flags.length;
+
+    const synBtn = document.getElementById('synthesize-btn');
+    if (isAdmin && flags.length > 0) {
+      synBtn.classList.remove('hidden');
+    } else {
+      synBtn.classList.add('hidden');
+    }
+
+    const flagsList = document.getElementById('flags-list');
+    if (!flags.length) {
+      flagsList.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">No pending concerns.</div>';
+    } else {
+      flagsList.innerHTML = flags.map(f => `
+        <div class="flag-card">
+          <div class="flag-text">${esc(f.text)}</div>
+          <div class="flag-date">${f.date}</div>
+        </div>
+      `).join('');
+    }
+
+    const nudgesList = document.getElementById('nudges-list');
+    if (!nudges.length) {
+      nudgesList.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">No nudges generated yet.</div>';
+    } else {
+      nudgesList.innerHTML = [...nudges].reverse().map(n => `
+        <div class="nudge-card">
+          <div class="nudge-icon">✦</div>
+          <div class="nudge-text">${esc(n.text)}</div>
+          <div class="nudge-meta">${n.date} · synthesized from ${n.flags_synthesized} concern${n.flags_synthesized !== 1 ? 's' : ''}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  async function submitFlag() {
+    const text = document.getElementById('flag-text').value.trim();
+    if (!text) return;
+    const r = await fetch('/api/house/flags', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({text}),
+    });
+    if (r.ok) {
+      document.getElementById('flag-text').value = '';
+      loadFlags();
+    } else {
+      alert('Could not submit concern.');
+    }
+  }
+
+  async function synthesize() {
+    const btn = document.getElementById('synthesize-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    const r = await fetch('/api/house/flags/synthesize', {method:'POST'});
+    btn.disabled = false;
+    btn.textContent = '✦ Generate nudge';
+    if (r.ok) loadFlags();
+    else alert('Could not generate nudge.');
+  }
+
+  // ── Utils ─────────────────────────────────────────────────────────────────
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   init();
 </script>
 </body>

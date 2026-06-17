@@ -11,12 +11,14 @@
     :root {
       --bg:#F6F1EB;--surface:#FDFAF6;--text:#1B1612;--muted:#8A7E74;--light:#B8ADA4;
       --border:#E2D9D0;--border-lt:#EDE7DF;--blue:#3B5FA0;--blue-lt:#EDF0F8;
-      --terra:#C0592A;--gold:#A8844E;--gold-lt:#F9F3E8;--green:#3A7A5A;--green-lt:#EDF4EF;
-      --r:14px;--r-sm:8px;--sidebar:214px;
+      --terra:#C0592A;--terra-lt:#FAEEE8;--gold:#A8844E;--gold-lt:#F9F3E8;
+      --green:#3A7A5A;--green-lt:#EDF4EF;--r:14px;--r-sm:8px;--sidebar:214px;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;}
     body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.45;}
+
+    /* ── Sidebar ── */
     .sidebar{width:var(--sidebar);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:200;}
     .sb-brand{padding:24px 20px 16px;border-bottom:1px solid var(--border-lt);}
     .sb-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:-.02em;}
@@ -33,19 +35,58 @@
     .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;color:white;flex-shrink:0;}
     .sb-uname{font-size:13px;font-weight:500;}
     .sb-urole{font-size:11px;color:var(--muted);}
-    .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
-    .topbar{padding:16px 30px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-lt);background:var(--surface);position:sticky;top:0;z-index:100;}
+
+    /* ── Main ── */
+    .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+    .topbar{padding:16px 30px;display:flex;align-items:center;border-bottom:1px solid var(--border-lt);background:var(--surface);position:sticky;top:0;z-index:100;}
     .topbar-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;letter-spacing:-.02em;}
-    .coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;padding:60px 30px;text-align:center;}
-    .cs-icon{font-size:48px;opacity:.4;}
-    .cs-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;letter-spacing:-.02em;color:var(--text);}
-    .cs-note{font-size:13px;color:var(--muted);max-width:340px;line-height:1.65;}
-    .cs-items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;}
-    .cs-tag{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--muted);}
+    .content{padding:28px 30px;flex:1;max-width:680px;}
+
+    /* ── Presence card ── */
+    .presence-card{border-radius:var(--r);padding:28px 24px;display:flex;align-items:center;gap:20px;cursor:pointer;transition:all .18s;border:1px solid transparent;margin-bottom:24px;user-select:none;}
+    .presence-card:hover{filter:brightness(.97);}
+    .presence-card.home{background:var(--green-lt);border-color:#C4DDD0;}
+    .presence-card.away{background:var(--border-lt);border-color:var(--border);}
+    .presence-card.dnd{background:var(--terra-lt);border-color:#EAC4B8;}
+    .presence-avatar{width:56px;height:56px;font-size:26px;flex-shrink:0;}
+    .presence-body{flex:1;}
+    .presence-label{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;letter-spacing:-.01em;margin-bottom:3px;}
+    .presence-sub{font-size:12px;color:var(--muted);}
+    .presence-toggle-hint{font-size:11px;color:var(--light);margin-top:6px;}
+    .presence-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;align-self:flex-start;}
+    .badge-home{background:var(--green);color:white;}
+    .badge-away{background:var(--muted);color:white;}
+    .badge-dnd{background:var(--terra);color:white;}
+
+    /* ── Section heading ── */
+    .sec-head{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--light);font-weight:500;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-lt);}
+
+    /* ── Quick actions ── */
+    .actions-row{display:flex;gap:10px;margin-bottom:28px;}
+    .btn{padding:7px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .13s;}
+    .btn:hover{background:var(--bg);color:var(--text);border-color:var(--text);}
+    .btn svg{width:13px;height:13px;opacity:.6;}
+
+    /* ── Inventory ── */
+    .inv-section{margin-bottom:28px;}
+    .inv-sec-title{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px;}
+    .inv-grid{display:flex;flex-direction:column;gap:5px;}
+    .inv-row{display:flex;align-items:center;gap:10px;padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);}
+    .inv-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .inv-dot.ok{background:var(--green);}
+    .inv-dot.low{background:var(--gold);}
+    .inv-dot.out{background:var(--terra);}
+    .inv-name{flex:1;font-size:13px;}
+    .inv-qty{font-size:12px;color:var(--muted);}
+    .inv-unit{font-size:11px;color:var(--light);margin-left:2px;}
+
+    .empty-inv{font-size:13px;color:var(--muted);padding:16px 0;}
+
     @media(max-width:960px){.sidebar{display:none;}.main{margin-left:0;}}
   </style>
 </head>
 <body>
+
 <aside class="sidebar">
   <div class="sb-brand">
     <div class="sb-name">Devlithium</div>
@@ -80,35 +121,147 @@
     </div>
   </div>
 </aside>
+
 <main class="main">
   <div class="topbar">
     <div class="topbar-title" id="page-title">My Room</div>
   </div>
-  <div class="coming-soon">
-    <div class="cs-icon">🛏️</div>
-    <div class="cs-title">My Room — Coming soon</div>
-    <div class="cs-note">Upload photos of your room and cupboards, get AI suggestions for organisation, log your personal inventory, and set your DND or away status.</div>
-    <div class="cs-items">
-      <span class="cs-tag">Photo uploads</span>
-      <span class="cs-tag">AI room suggestions</span>
-      <span class="cs-tag">Personal inventory</span>
-      <span class="cs-tag">DND / Away status</span>
+  <div class="content">
+
+    <!-- Presence card -->
+    <div class="presence-card home" id="presence-card" onclick="cyclePresence()">
+      <div class="avatar presence-avatar" id="presence-avatar" style="background:var(--blue)">?</div>
+      <div class="presence-body">
+        <div class="presence-label" id="presence-label">Home</div>
+        <div class="presence-sub" id="presence-sub">You're marked as home</div>
+        <div class="presence-toggle-hint">Tap to change status</div>
+      </div>
+      <span class="presence-badge badge-home" id="presence-badge">Home</span>
     </div>
+
+    <!-- Quick actions -->
+    <div class="sec-head">Quick actions</div>
+    <div class="actions-row" style="margin-top:12px;">
+      <a class="btn" href="/house">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.5 1.5a.5.5 0 00-1 0v1.086A5.002 5.002 0 003.5 7.5c0 .818.197 1.59.543 2.27L2.22 11.593a.75.75 0 001.06 1.06l1.75-1.75A4.97 4.97 0 008 11.5a4.97 4.97 0 002.97-.597l1.75 1.75a.75.75 0 001.06-1.06L11.957 9.77A4.978 4.978 0 0012.5 7.5a5.002 5.002 0 00-4-4.914V1.5zM8 4a3.5 3.5 0 110 7A3.5 3.5 0 018 4z"/></svg>
+        Log repair
+      </a>
+      <a class="btn" href="/residents">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 2v2h2V4H4zm4 0v2h2V4H8zm0 4v2h2V8H8zm-4 0v2h2V8H4z"/></svg>
+        View expenses
+      </a>
+    </div>
+
+    <!-- Inventory -->
+    <div style="margin-top:28px;">
+      <div class="sec-head">House inventory</div>
+      <div id="inventory-content">
+        <div class="empty-inv">Loading…</div>
+      </div>
+    </div>
+
   </div>
 </main>
+
 <script>
+  let me = null;
+  let currentPresence = 'home';
+  const CYCLE = ['home', 'away', 'dnd'];
+  const PRESENCE_META = {
+    home: { label: 'Home',  sub: "You're marked as home",  cardClass: 'home', badgeClass: 'badge-home',  badgeText: 'Home'  },
+    away: { label: 'Away',  sub: "You're currently away",  cardClass: 'away', badgeClass: 'badge-away',  badgeText: 'Away'  },
+    dnd:  { label: 'Do Not Disturb', sub: "DND is on — you won't be disturbed", cardClass: 'dnd', badgeClass: 'badge-dnd', badgeText: 'DND' },
+  };
+
   async function init() {
-    let me = null;
     try { const r = await fetch('/api/me'); if (r.ok) me = await r.json(); } catch {}
     if (!me) { const s = localStorage.getItem('dl_user'); if (s) me = JSON.parse(s); }
-    if (!me) { window.location.href = 'login.html'; return; }
+    if (!me) { window.location.href = '/login'; return; }
+
     const av = document.getElementById('sb-avatar');
     av.style.background = me.color || '#3B5FA0';
     av.textContent = (me.name || '?')[0];
     document.getElementById('sb-uname').textContent = me.name || '—';
     document.getElementById('sb-urole').textContent = me.role || 'Resident';
-    document.getElementById('page-title').textContent = `${me.name}'s Room`;
+    document.getElementById('page-title').textContent = (me.name || 'My') + ''s Room';
+
+    const presAv = document.getElementById('presence-avatar');
+    presAv.style.background = me.color || '#3B5FA0';
+    presAv.textContent = (me.name || '?')[0];
+
+    try {
+      const dash = await fetch('/api/dashboard').then(r => r.json());
+      const mine = (dash.presence || []).find(p => p.id === me.user_id);
+      if (mine) setPresenceUI(mine.presence || 'home');
+    } catch {}
+
+    loadInventory();
   }
+
+  function setPresenceUI(state) {
+    currentPresence = state;
+    const meta = PRESENCE_META[state] || PRESENCE_META.home;
+    const card = document.getElementById('presence-card');
+    card.className = 'presence-card ' + meta.cardClass;
+    document.getElementById('presence-label').textContent = meta.label;
+    document.getElementById('presence-sub').textContent = meta.sub;
+    const badge = document.getElementById('presence-badge');
+    badge.className = 'presence-badge ' + meta.badgeClass;
+    badge.textContent = meta.badgeText;
+  }
+
+  async function cyclePresence() {
+    const next = CYCLE[(CYCLE.indexOf(currentPresence) + 1) % CYCLE.length];
+    setPresenceUI(next);
+    try {
+      await fetch(`/api/residents/${me.user_id}/presence`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ presence: next }),
+      });
+    } catch {
+      // revert on failure
+      setPresenceUI(currentPresence);
+    }
+  }
+
+  async function loadInventory() {
+    const container = document.getElementById('inventory-content');
+    try {
+      const items = await fetch('/api/house/inventory').then(r => r.json());
+      if (!items.length) {
+        container.innerHTML = '<div class="empty-inv">No inventory items found.</div>';
+        return;
+      }
+      const sections = {};
+      items.forEach(it => {
+        const label = it.section === 'grocery' ? 'Grocery' : 'Cleaning Supplies';
+        (sections[label] = sections[label] || []).push(it);
+      });
+      container.innerHTML = Object.entries(sections).map(([sec, its]) => `
+        <div class="inv-section" style="margin-bottom:20px;">
+          <div class="inv-sec-title">${sec}</div>
+          <div class="inv-grid">
+            ${its.map(it => `
+              <div class="inv-row">
+                <div class="inv-dot ${it.status}"></div>
+                <div class="inv-name">${esc(it.item)}</div>
+                <span class="inv-qty">${it.current_qty}</span>
+                <span class="inv-unit">${esc(it.unit)}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    } catch {
+      container.innerHTML = '<div class="empty-inv">Could not load inventory.</div>';
+    }
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   init();
 </script>
 </body>

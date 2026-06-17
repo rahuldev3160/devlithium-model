@@ -7,7 +7,7 @@ import json
 import os
 import secrets
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -422,7 +422,8 @@ def api_dashboard(dlsession: Optional[str] = Cookie(default=None)):
 
     money_note = f"₹{alert - balance:,.0f} below target" if balance < alert else "Pool fund healthy"
 
-    open_repairs = kb.get("services", {}).get("repair", {}).get("open_issues", [])
+    all_issues   = kb.get("services", {}).get("repair", {}).get("issues", [])
+    open_repairs = [i for i in all_issues if i.get("status") == "open"]
     num_repairs  = len(open_repairs)
     house_status = "critical" if num_repairs >= 3 else "warn" if num_repairs >= 1 else "ok"
     house_note   = f"{num_repairs} open" if num_repairs else "All clear"
@@ -525,3 +526,327 @@ def my_room_page(dlsession: Optional[str] = Cookie(default=None)):
     if not get_session_user(dlsession):
         return RedirectResponse("/login")
     return FileResponse(WEB / "static" / "my_room.html")
+
+
+# ── House: Repairs ────────────────────────────────────────────────────────────
+
+def _save_kb(kb: dict):
+    kb["_meta"]["last_updated"] = datetime.now().strftime("%Y-%m-%d")
+    (DATA / "house_kb.json").write_text(json.dumps(kb, indent=2, ensure_ascii=False))
+
+
+@app.get("/api/house/repairs")
+def api_get_repairs(dlsession: Optional[str] = Cookie(default=None)):
+    if not get_session_user(dlsession):
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    issues = kb.get("services", {}).get("repair", {}).get("issues", [])
+    auth = load_auth()
+    rooms_map = {r["id"]: r["name"] for r in kb.get("rooms", [])}
+    residents_map = {r["id"]: r["name"] for r in kb.get("residents", [])}
+    result = []
+    for i in issues:
+        result.append({
+            **i,
+            "room_name": rooms_map.get(i.get("room_id", ""), "—"),
+            "reporter_name": auth.get(i.get("reported_by", ""), {}).get("name", "Resident"),
+        })
+    return result
+
+
+@app.post("/api/house/repairs")
+async def api_add_repair(
+    dlsession: Optional[str] = Cookie(default=None),
+    body: dict = Body(...),
+):
+    uid = get_session_user(dlsession)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    title = body.get("title", "").strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Title required")
+    kb = load_kb()
+    repair_svc = kb.setdefault("services", {}).setdefault("repair", {})
+    issues = repair_svc.setdefault("issues", [])
+    issue = {
+        "id":            f"rep_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "title":         title,
+        "description":   body.get("description", ""),
+        "room_id":       body.get("room_id"),
+        "urgency":       body.get("urgency", "medium"),
+        "status":        "open",
+        "reported_by":   uid,
+        "reported_date": datetime.now().strftime("%Y-%m-%d"),
+        "resolved_date": None,
+        "provider":      None,
+        "cost_inr":      None,
+    }
+    issues.append(issue)
+    _save_kb(kb)
+    return {"ok": True, "issue": issue}
+
+
+@app.patch("/api/house/repairs/{repair_id}")
+async def api_update_repair(
+    repair_id: str,
+    dlsession: Optional[str] = Cookie(default=None),
+    body: dict = Body(...),
+):
+    uid = get_session_user(dlsession)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    admins = kb.get("_meta", {}).get("admins", ["u1"])
+    issues = kb.get("services", {}).get("repair", {}).get("issues", [])
+    for issue in issues:
+        if issue["id"] == repair_id:
+            if "status" in body:
+                new_status = body["status"]
+                if new_status not in ("open", "in_progress", "resolved"):
+                    raise HTTPException(status_code=400, detail="Invalid status")
+                if new_status == "resolved" and uid not in admins:
+                    raise HTTPException(status_code=403, detail="Only admins can resolve repairs")
+                issue["status"] = new_status
+                if new_status == "resolved":
+                    issue["resolved_date"] = datetime.now().strftime("%Y-%m-%d")
+            for field in ("provider", "cost_inr"):
+                if field in body:
+                    issue[field] = body[field]
+            _save_kb(kb)
+            return {"ok": True}
+    raise HTTPException(status_code=404, detail="Repair not found")
+
+
+# ── House: Inventory ──────────────────────────────────────────────────────────
+
+@app.get("/api/house/inventory")
+def api_get_inventory(dlsession: Optional[str] = Cookie(default=None)):
+    if not get_session_user(dlsession):
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    result = []
+    for section_name, items in kb.get("inventory", {}).items():
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            qty = item.get("current_qty", 0)
+            threshold = item.get("reorder_threshold", 0)
+            status = "out" if qty == 0 else "low" if qty <= threshold else "ok"
+            result.append({
+                "section":           section_name,
+                "item":              item.get("item", ""),
+                "unit":              item.get("unit", ""),
+                "current_qty":       qty,
+                "reorder_threshold": threshold,
+                "status":            status,
+                "supplier":          item.get("supplier", ""),
+            })
+    return result
+
+
+@app.patch("/api/house/inventory")
+async def api_update_inventory(
+    dlsession: Optional[str] = Cookie(default=None),
+    body: dict = Body(...),
+):
+    uid = get_session_user(dlsession)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    admins = kb.get("_meta", {}).get("admins", ["u1"])
+    if uid not in admins:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    item_name = body.get("item")
+    new_qty = body.get("current_qty")
+    if item_name is None or new_qty is None:
+        raise HTTPException(status_code=400, detail="item and current_qty required")
+    for section in kb.get("inventory", {}).values():
+        if not isinstance(section, list):
+            continue
+        for item in section:
+            if item.get("item") == item_name:
+                item["current_qty"] = float(new_qty)
+                _save_kb(kb)
+                return {"ok": True}
+    raise HTTPException(status_code=404, detail="Item not found")
+
+
+# ── House: Behavioral Flags ───────────────────────────────────────────────────
+
+@app.get("/api/house/flags")
+def api_get_flags(dlsession: Optional[str] = Cookie(default=None)):
+    if not get_session_user(dlsession):
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    return {"flags": kb.get("house_flags", []), "nudges": kb.get("house_nudges", [])}
+
+
+@app.post("/api/house/flags")
+async def api_submit_flag(
+    dlsession: Optional[str] = Cookie(default=None),
+    body: dict = Body(...),
+):
+    uid = get_session_user(dlsession)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    text = body.get("text", "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Flag text required")
+    kb = load_kb()
+    flag = {
+        "id":   f"flag_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "text": text,
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        # reporter intentionally not stored
+    }
+    kb.setdefault("house_flags", []).append(flag)
+    _save_kb(kb)
+    return {"ok": True}
+
+
+@app.post("/api/house/flags/synthesize")
+async def api_synthesize_flags(dlsession: Optional[str] = Cookie(default=None)):
+    uid = get_session_user(dlsession)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    admins = kb.get("_meta", {}).get("admins", ["u1"])
+    if uid not in admins:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    flags = kb.get("house_flags", [])
+    if not flags:
+        raise HTTPException(status_code=400, detail="No flags to synthesize")
+    flag_lines = "\n".join(f"- {f['text']} ({f['date']})" for f in flags)
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=200,
+        messages=[{
+            "role": "user",
+            "content": (
+                "You are Devlithium, a home manager AI for a shared house. "
+                "These are anonymous concerns raised by residents:\n\n"
+                f"{flag_lines}\n\n"
+                "Write a single, warm, diplomatic house nudge that addresses these concerns. "
+                "Under 60 words. No bullet points. No names. No accusatory tone."
+            ),
+        }],
+    )
+    nudge_text = response.content[0].text.strip()
+    nudge = {
+        "id":                f"nudge_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "text":              nudge_text,
+        "date":              datetime.now().strftime("%Y-%m-%d"),
+        "flags_synthesized": len(flags),
+    }
+    kb.setdefault("house_nudges", []).append(nudge)
+    kb["house_flags"] = []  # clear after synthesis
+    _save_kb(kb)
+    return {"ok": True, "nudge": nudge}
+
+
+# ── Finance: Recurring Bill Templates ─────────────────────────────────────────
+
+@app.get("/api/finance/templates")
+def api_get_templates(dlsession: Optional[str] = Cookie(default=None)):
+    if not get_session_user(dlsession):
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    return kb.get("finance", {}).get("bill_templates", [])
+
+
+@app.post("/api/finance/templates")
+async def api_create_template(
+    dlsession: Optional[str] = Cookie(default=None),
+    body: dict = Body(...),
+):
+    uid = get_session_user(dlsession)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    admins = kb.get("_meta", {}).get("admins", ["u1"])
+    if uid not in admins:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    template = {
+        "id":               f"tmpl_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "name":             body.get("name", "Bill"),
+        "category":         body.get("category", "utility"),
+        "amount_inr":       float(body.get("amount_inr", 0)),
+        "frequency":        body.get("frequency", "monthly"),
+        "included_rooms":   body.get("included_rooms", []),
+        "last_logged_date": None,
+        "next_due_date":    None,
+        "notes":            body.get("notes", ""),
+    }
+    kb["finance"].setdefault("bill_templates", []).append(template)
+    _save_kb(kb)
+    return {"ok": True, "template": template}
+
+
+@app.post("/api/finance/templates/{template_id}/log")
+async def api_log_template(
+    template_id: str,
+    dlsession: Optional[str] = Cookie(default=None),
+):
+    uid = get_session_user(dlsession)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    kb = load_kb()
+    admins = kb.get("_meta", {}).get("admins", ["u1"])
+    if uid not in admins:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    templates = kb.get("finance", {}).get("bill_templates", [])
+    template = next((t for t in templates if t["id"] == template_id), None)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    amount = template["amount_inr"]
+    included_rooms = template.get("included_rooms", [])
+    rooms_map = {r["id"]: r for r in kb.get("rooms", [])}
+    residents_map = {r["id"]: r for r in kb.get("residents", [])}
+
+    splits = []
+    for room_id in included_rooms:
+        room = rooms_map.get(room_id)
+        if not room:
+            continue
+        occ_id = room.get("occupant_id")
+        occ_name = residents_map[occ_id]["name"] if occ_id and occ_id in residents_map else "Vacant"
+        splits.append({
+            "room_id":       room_id,
+            "room_name":     room["name"],
+            "occupant_id":   occ_id,
+            "occupant_name": occ_name,
+        })
+
+    if not splits:
+        raise HTTPException(status_code=400, detail="No valid rooms in template")
+
+    share = round(amount / len(splits), 2)
+    for s in splits:
+        s["share_inr"] = share
+
+    method = "direct_split" if amount >= 1000 else "pool_deduction"
+    entry = {
+        "id":                f"exp_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "date":              datetime.now().strftime("%Y-%m-%d"),
+        "category":          template["category"],
+        "description":       template["name"],
+        "amount_inr":        amount,
+        "method":            method,
+        "num_spaces":        len(splits),
+        "share_per_space_inr": share,
+        "splits":            splits,
+        "logged_by":         uid,
+        "from_template":     template_id,
+    }
+    kb["finance"]["expense_log"].append(entry)
+
+    freq_days = {"monthly": 30, "bimonthly": 60, "quarterly": 90}
+    days = freq_days.get(template.get("frequency", "monthly"), 30)
+    template["last_logged_date"] = datetime.now().strftime("%Y-%m-%d")
+    template["next_due_date"] = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
+
+    _save_kb(kb)
+    return {"ok": True, "entry": entry}
